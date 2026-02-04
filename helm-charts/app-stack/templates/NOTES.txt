@@ -1,0 +1,27 @@
+=======================================================
+  Multi-Tier Application Deployed Successfully!
+=======================================================
+
+Components:
+{{- if index .Values "api-gateway" "enabled" }}
+  - API Gateway: Enabled
+{{- end }}
+{{- if index .Values "backend-api" "enabled" }}
+  - Backend API: Enabled
+{{- end }}
+{{- if index .Values "mysql" "enabled" }}
+  - MySQL Database: Enabled
+{{- end }}
+{{- if index .Values "redis" "enabled" }}
+  - Redis Cache: Enabled
+{{- end }}
+
+Access the API Gateway:
+  kubectl port-forward svc/{{ .Release.Name }}-api-gateway 5000:5000
+
+Test the stack:
+  curl http://localhost:5000/health
+  curl http://localhost:5000/api/items
+
+View all resources:
+  kubectl get all -l app.kubernetes.io/instance={{ .Release.Name }}

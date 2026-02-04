@@ -1,0 +1,18 @@
+# Global values shared across all subcharts
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
+  storageClass: ""
+
+# Subchart toggles
+api-gateway:
+  enabled: true
+
+backend-api:
+  enabled: true
+
+mysql:
+  enabled: true
+
+redis:
+  enabled: true

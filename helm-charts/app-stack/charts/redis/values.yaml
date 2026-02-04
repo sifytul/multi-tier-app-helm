@@ -1,0 +1,23 @@
+image:
+  repository: redis
+  tag: "7.2-alpine"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 6379
+
+auth:
+  password: redis_password
+
+memory:
+  maxmemory: "128mb"
+  policy: "allkeys-lru"
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi

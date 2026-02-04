@@ -1,0 +1,15 @@
+dependencies:
+- name: api-gateway
+  repository: file://charts/api-gateway
+  version: 1.0.0
+- name: backend-api
+  repository: file://charts/backend-api
+  version: 1.0.0
+- name: mysql
+  repository: file://charts/mysql
+  version: 1.0.0
+- name: redis
+  repository: file://charts/redis
+  version: 1.0.0
+digest: sha256:ed6f27e6f85f2d72cc178019455cca6b66b38004815a264f9250345550fd703b
+generated: "2026-02-04T18:44:29.563945921Z"
