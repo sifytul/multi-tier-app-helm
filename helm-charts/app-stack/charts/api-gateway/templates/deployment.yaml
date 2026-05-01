@@ -12,6 +12,15 @@ spec:
     matchLabels:
       app: api-gateway
       app.kubernetes.io/instance: {{ .Release.Name }}
+  {{- if .Values.podAntiAffinity.enabled }}
+  antiAffinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchLabels:
+            app: api-gateway
+        topologyKey: {{ .Values.podAntiAffinity.topologyKey }}
+  {{- end }}
   template:
     metadata:
       labels:
@@ -24,13 +33,18 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: 5000
+              name: http
           env:
             - name: PORT
               value: "5000"
             - name: BACKEND_URL
               value: "http://{{ .Release.Name }}-backend-api:6000"
+            - name: NODE_ENV
+              value: "production"
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
           livenessProbe:
             httpGet:
               path: /health

@@ -1,4 +1,4 @@
-replicaCount: 1
+replicaCount: 3
 
 image:
   repository: sifytul/api-gateway
@@ -9,6 +9,11 @@ service:
   type: ClusterIP
   port: 5000
 
+hpa:
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilization: 80
+
 resources:
   limits:
     cpu: 200m
@@ -17,4 +22,13 @@ resources:
     cpu: 100m
     memory: 128Mi
 
-backendUrl: "http://{{ .Release.Name }}-backend-api:6000"
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+
+podAntiAffinity:
+  enabled: true
+  topologyKey: kubernetes.io/hostname
