@@ -12,6 +12,15 @@ spec:
     matchLabels:
       app: backend-api
       app.kubernetes.io/instance: {{ .Release.Name }}
+  {{- if .Values.podAntiAffinity.enabled }}
+  antiAffinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchLabels:
+            app: backend-api
+        topologyKey: {{ .Values.podAntiAffinity.topologyKey }}
+  {{- end }}
   template:
     metadata:
       labels:
@@ -24,6 +33,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: 6000
+              name: http
           env:
             - name: MYSQL_HOST
               value: "{{ .Release.Name }}-mysql"
@@ -51,6 +61,8 @@ spec:
               value: "{{ .Values.cacheTTL }}"
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
           livenessProbe:
             httpGet:
               path: /health

@@ -1,4 +1,4 @@
-replicaCount: 3
+replicaCount: 2
 
 image:
   repository: sifytul/backend-api
@@ -16,6 +16,17 @@ resources:
   requests:
     cpu: 150m
     memory: 256Mi
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+
+podAntiAffinity:
+  enabled: true
+  topologyKey: kubernetes.io/hostname
 
 mysql:
   host: ""
