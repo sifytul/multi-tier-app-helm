@@ -2,7 +2,9 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 import mysql.connector
+from mysql.connector import pooling
 import redis
+from redis import ConnectionPool
 import json
 import os
 
@@ -21,6 +23,41 @@ REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", None)
 
 CACHE_TTL = int(os.getenv("CACHE_TTL", "300"))
 
+# Connection pools (initialized lazily)
+_db_pool = None
+_redis_pool = None
+
+
+def get_db_pool():
+    """Get or create database connection pool."""
+    global _db_pool
+    if _db_pool is None:
+        _db_pool = pooling.MySQLConnectionPool(
+            pool_name="app_pool",
+            pool_size=5,
+            pool_reset_session=True,
+            host=MYSQL_HOST,
+            port=MYSQL_PORT,
+            user=MYSQL_USER,
+            password=MYSQL_PASSWORD,
+            database=MYSQL_DATABASE
+        )
+    return _db_pool
+
+
+def get_redis_pool():
+    """Get or create Redis connection pool."""
+    global _redis_pool
+    if _redis_pool is None:
+        _redis_pool = ConnectionPool(
+            host=REDIS_HOST,
+            port=REDIS_PORT,
+            password=REDIS_PASSWORD,
+            decode_responses=True,
+            max_connections=10
+        )
+    return _redis_pool
+
 
 class Item(BaseModel):
     name: str
@@ -33,24 +70,13 @@ class ItemResponse(Item):
 
 
 def get_db_connection():
-    """Create database connection."""
-    return mysql.connector.connect(
-        host=MYSQL_HOST,
-        port=MYSQL_PORT,
-        user=MYSQL_USER,
-        password=MYSQL_PASSWORD,
-        database=MYSQL_DATABASE
-    )
+    """Get connection from pool."""
+    return get_db_pool().get_connection()
 
 
 def get_redis_client():
-    """Create Redis client."""
-    return redis.Redis(
-        host=REDIS_HOST,
-        port=REDIS_PORT,
-        password=REDIS_PASSWORD,
-        decode_responses=True
-    )
+    """Get Redis client from pool."""
+    return redis.Redis(connection_pool=get_redis_pool())
 
 
 @app.get("/health")
